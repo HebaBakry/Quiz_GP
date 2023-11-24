@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'VisibilityBloc/visibilityBloc.dart';
 import 'reset_password_screen.dart';
 import 'type_of_account_screen.dart';
 import 'input_border.dart';
@@ -21,7 +23,9 @@ class _LogInState extends State<LogIn>{
   Color color = const Color(0xff82498d);
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return BlocProvider(
+        create: (context) => VisibilityBloc(),
+    child: Scaffold(
         appBar: AppBar(
           title: const Text('Log in',style: TextStyle(fontSize: 25),),
           centerTitle: true,
@@ -65,43 +69,50 @@ class _LogInState extends State<LogIn>{
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                      child: TextField(
-                        obscureText: !isVisible,
-                        controller: passwordController,
-                        decoration: InputDecoration(
-                          //myInputBorder() and myFocusBorder() functions in input_border file
-                            enabledBorder: myInputBorder(),
-                            focusedBorder: myFocusBorder(),
-                            labelText: 'Password',
-                            labelStyle: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 15
-                            ),
-                            //put 'Forgot Password?' in counter place
-                            counter: InkWell(
-                                onTap: () {
-                                  Navigator.push(context,
-                                      MaterialPageRoute(builder: (
-                                          context) => const ResetPass(),));
-                                },
-                                child: Text(
-                                  'Forgot Password?',
-                                  style: TextStyle(color: Colors.grey.shade700,
-                                      fontSize: 14),
+                      child: BlocBuilder<VisibilityBloc,VisibilityBlocState>(
+                        builder: (context,state) {
+                          if(state is Init){
+                            isVisible = false;
+                          }
+                          else if(state is ToggleVisibility){
+                            isVisible = !isVisible;
+                          }
+                          return TextField(
+                            obscureText: !isVisible,
+                            controller: passwordController,
+                            decoration: InputDecoration(
+                              //myInputBorder() and myFocusBorder() functions in input_border file
+                                enabledBorder: myInputBorder(),
+                                focusedBorder: myFocusBorder(),
+                                labelText: 'Password',
+                                labelStyle: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 15
+                                ),
+                                //put 'Forgot Password?' in counter place
+                                counter: InkWell(
+                                    onTap: () {
+                                      Navigator.push(context,
+                                          MaterialPageRoute(builder: (
+                                              context) => const ResetPass(),));
+                                    },
+                                    child: Text(
+                                      'Forgot Password?',
+                                      style: TextStyle(color: Colors.grey.shade700,
+                                          fontSize: 14),
+                                    )
+                                ),
+
+                                suffixIcon: InkWell(
+                                  onTap: () {
+                                    BlocProvider.of<VisibilityBloc>(context).add(ChangeVisibility());
+                                  },
+                                  child: Icon(isVisible ? Icons.visibility : Icons
+                                      .visibility_off, color: color,),
                                 )
                             ),
-
-                            suffixIcon: InkWell(
-                              onTap: () {
-                                //use setState to toggle password visibility
-                                setState(() {
-                                  isVisible = !isVisible;
-                                });
-                              },
-                              child: Icon(isVisible ? Icons.visibility : Icons
-                                  .visibility_off, color: color,),
-                            )
-                        ),
+                          );
+                        }
                       ),
                     ),
                     Container(
@@ -143,6 +154,6 @@ class _LogInState extends State<LogIn>{
 
                   ],))
         )
-    );
+    ));
   }
 }

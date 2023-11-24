@@ -1,27 +1,27 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_gp/Student%20Home/room_screen_student.dart';
 import 'package:quiz_gp/Teacher_Home/profile.dart';
 import 'package:quiz_gp/Teacher_Home/room_screen.dart';
 
-class TeacherHome extends StatefulWidget{
-  const TeacherHome({super.key});
+class StudentHome extends StatefulWidget{
+  const StudentHome({super.key});
 
   @override
-  State<TeacherHome> createState() => _TeacherHomeState();
+  State<StudentHome> createState() => _StudentHomeState();
 
 }
 
-class _TeacherHomeState extends State<TeacherHome> {
+class _StudentHomeState extends State<StudentHome> {
   Color color = const Color(0xff82498d);
   int selectIndex = 0;
   List<Widget> screens = [
-    RoomScreen(),
+    const RoomScreenStudent(),
     const ProfileScreen()
   ];
   @override
   Widget build(BuildContext context) {
     return   Scaffold(
       body: screens[selectIndex],
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: selectIndex,
         selectedItemColor: Colors.white,

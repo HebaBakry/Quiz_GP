@@ -1,29 +1,44 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:quiz_gp/ErrorBloc/ErrorBloc.dart';
 import 'login_screen.dart';
 import 'input_border.dart';
 import 'package:country_picker/country_picker.dart';
 
 
-class SignUp extends StatefulWidget {
+class SignUp extends StatefulWidget{
   const SignUp({super.key});
 
   @override
   State<SignUp> createState() => _SignUpState();
 }
 
-class _SignUpState extends State<SignUp>{
+class _SignUpState extends State<SignUp> {
   TextEditingController email = TextEditingController();
+
   TextEditingController country = TextEditingController();
+
   TextEditingController password = TextEditingController();
+
   TextEditingController fullName = TextEditingController();
+
   TextEditingController phone = TextEditingController();
+
   TextEditingController birthdate = TextEditingController();
+
   TextEditingController rePassword = TextEditingController();
+
   DateTime? _selectedDate;
+
   String label = 'Select your country';
-  bool isVisible = false;
+
+  bool isVisiblePass = false;
+  bool isVisibleRepass = false;
+
   String? errEmail;
+
   String? errRePass;
+
   Color color = const Color(0xff82498d);
 
   Future<void> _selectDate(BuildContext context) async {
@@ -38,10 +53,13 @@ class _SignUpState extends State<SignUp>{
         birthdate.text = picked.toString().substring(0,10);
     }
   }
+
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-        appBar: AppBar(
+    return  BlocProvider(
+        create: (context) => ErrorBloc(),
+        child:  Scaffold(
+          appBar: AppBar(
           title: const Text('Sign up',style: TextStyle(fontSize: 25),),
           centerTitle: true,
           backgroundColor: color,
@@ -84,36 +102,46 @@ class _SignUpState extends State<SignUp>{
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                      child: TextField(
-                        keyboardType: TextInputType.emailAddress,
-                        controller: email,
-                        onChanged: (val){
-                          if(!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)){
-                            errEmail = 'Please enter correct email';
-                          }
-                          else{
+                      child:BlocBuilder<ErrorBloc,ErrorBlocState>(
+                        builder: (context,state) {
+                          if (state is Init) {
                             errEmail = null;
                           }
-                          setState(() {
-                          });
-                        },
-                        decoration: InputDecoration(
-                          //myInputBorder() and myFocusBorder() functions in input_border file
-                          enabledBorder: myInputBorder(),
-                          focusedBorder: myFocusBorder(),
-                          labelText: 'Email',
-                          labelStyle: TextStyle(
-                              color: Colors.grey.shade600,
-                              fontSize: 15
-                          ),
-                          errorText: errEmail,
-                          errorStyle: const TextStyle(color: Colors.red,fontSize: 12),
-                          errorBorder: myErrorBorder(),
-                          suffixIcon:  Icon(
-                            Icons.email_rounded, color: color,),
-                        ),
+                          else if (state is ClearEmailError) {
+                            errEmail = null;
+                          }
+                          else if (state is CreateEmailError) {
+                            errEmail = 'Please enter correct email';
+                          }
+
+                          return TextField(
+                            keyboardType: TextInputType.emailAddress,
+                            controller: email,
+                            onChanged: (val){
+                              if(!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(val)){
+                                BlocProvider.of<ErrorBloc>(context).add(MakeEmailError());
+                              }
+                              else{
+                                BlocProvider.of<ErrorBloc>(context).add(RemoveEmailError());
+                              }
+                            },
+                            decoration: InputDecoration(
+                              //myInputBorder() and myFocusBorder() functions in input_border file
+                              enabledBorder: myInputBorder(),
+                              focusedBorder: myFocusBorder(),
+                              labelText: 'Email',
+                              labelStyle: TextStyle(
+                                  color: Colors.grey.shade600,
+                                  fontSize: 15
+                              ),
+                              errorText: errEmail,
+                              errorStyle: const TextStyle(color: Colors.red,fontSize: 12),
+                              errorBorder: myErrorBorder(),
+                              suffixIcon:  Icon(
+                                Icons.email_rounded, color: color,),
+                            ),
+                          );})
                       ),
-                    ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
                       child: TextField(
@@ -174,86 +202,107 @@ class _SignUpState extends State<SignUp>{
                         )),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                      child: TextField(
-                        obscureText: !isVisible,
-                        controller: password,
-                        decoration: InputDecoration(
-                          //myInputBorder() and myFocusBorder() functions in input_border file
-                            enabledBorder: myInputBorder(),
-                            focusedBorder: myFocusBorder(),
-                            labelText: 'Password',
-                            labelStyle: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 15
-                            ),
-                            //put 'Forgot Password?' in counter place
-                            // counter: InkWell(
-                            //     onTap: () {
-                            //       // Navigator.push(context,
-                            //       //     MaterialPageRoute(builder: (
-                            //       //         context) => const ResetPass(),));
-                            //     },
-                            //     child: Text(
-                            //       'Forgot Password?',
-                            //       style: TextStyle(color: Colors.grey.shade700,
-                            //           fontSize: 14),
-                            //     )
-                            // ),
+                      child: BlocBuilder<ErrorBloc,ErrorBlocState>(
+                        builder: (context,state) {
+                            if(state is Init){
+                              isVisiblePass = false;
+                            }
+                            else if(state is ToggleVisibilityPass){
+                              isVisiblePass = !isVisiblePass;
+                            }
+                          return TextField(
+                                obscureText: !isVisiblePass,
+                                controller: password,
+                                decoration: InputDecoration(
+                                  //myInputBorder() and myFocusBorder() functions in input_border file
+                                    enabledBorder: myInputBorder(),
+                                    focusedBorder: myFocusBorder(),
+                                    labelText: 'Password',
+                                    labelStyle: TextStyle(
+                                        color: Colors.grey.shade600,
+                                        fontSize: 15
+                                    ),
+                                    //put 'Forgot Password?' in counter place
+                                    // counter: InkWell(
+                                    //     onTap: () {
+                                    //       // Navigator.push(context,
+                                    //       //     MaterialPageRoute(builder: (
+                                    //       //         context) => const ResetPass(),));
+                                    //     },
+                                    //     child: Text(
+                                    //       'Forgot Password?',
+                                    //       style: TextStyle(color: Colors.grey.shade700,
+                                    //           fontSize: 14),
+                                    //     )
+                                    // ),
 
-                            suffixIcon: InkWell(
-                              onTap: () {
-                                //use setState to toggle password visibility
-                                setState(() {
-                                  isVisible = !isVisible;
-                                });
-                              },
-                              child: Icon(isVisible ? Icons.visibility : Icons
-                                  .visibility_off, color: color,),
-                            )
-                        ),
-                      ),
-                    ),
+                                    suffixIcon: InkWell(
+                                      onTap: () {
+                                        //use setState to toggle password visibility
+                                       BlocProvider.of<ErrorBloc>(context).add(ChangeVisibilityPass());
+                                      },
+                                      child: Icon(
+                                        isVisiblePass ? Icons.visibility : Icons
+                                            .visibility_off, color: color,),
+                                    )
+                                ),
+
+                            );
+                        }
+                      )),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(15, 0, 15, 15),
-                      child: TextField(
-                        obscureText: !isVisible,
-                        controller: rePassword,
-                        onChanged: (val){
-                          if(val != password.text){
-                            errRePass = 'Not Match';
-                          }
-                          else{
-                            errRePass = null;
-                          }
-                          setState(() {
-                          });
-                        },
-                        decoration: InputDecoration(
-                          //myInputBorder() and myFocusBorder() functions in input_border file
-                            enabledBorder: myInputBorder(),
-                            focusedBorder: myFocusBorder(),
-                            labelText: 'Re-Password',
-                            labelStyle: TextStyle(
-                                color: Colors.grey.shade600,
-                                fontSize: 15
+                    child:  BlocBuilder<ErrorBloc,ErrorBlocState>(
+                      builder: (context,state) {
+                        if (state is Init) {
+                          isVisibleRepass = false;
+                          errRePass = null;
+                        }
+                        else if (state is ClearRepassError) {
+                          errRePass = null;
+                        }
+                        else if (state is ToggleVisibilityRepass) {
+                          isVisibleRepass = !isVisibleRepass;
+                        }
+                        else if (state is CreateRePassError) {
+                          errRePass = 'Not Match';
+                        }
+                        return TextField(
+                            obscureText: !isVisibleRepass,
+                            controller: rePassword,
+                            onChanged: (val){
+                              if(val != password.text){
+                                BlocProvider.of<ErrorBloc>(context).add(MakeRepassError());
+                              }
+                              else{
+                                BlocProvider.of<ErrorBloc>(context).add(RemoveRepassError());
+                              }
+                            },
+                            decoration: InputDecoration(
+                              //myInputBorder() and myFocusBorder() functions in input_border file
+                                enabledBorder: myInputBorder(),
+                                focusedBorder: myFocusBorder(),
+                                labelText: 'Re-Password',
+                                labelStyle: TextStyle(
+                                    color: Colors.grey.shade600,
+                                    fontSize: 15
+                                ),
+                                errorText: errRePass,
+                                errorStyle: const TextStyle(color: Colors.red,fontSize: 12),
+                                errorBorder: myErrorBorder(),
+                                //put 'Forgot Password?' in counter place
+                                suffixIcon: InkWell(
+                                  onTap: () {
+                                    //use setState to toggle password visibility
+                                    BlocProvider.of<ErrorBloc>(context).add(ChangeVisibilityRepass());
+                                  },
+                                  child: Icon(isVisibleRepass ? Icons.visibility : Icons
+                                      .visibility_off, color: color,),
+                                )
                             ),
-                            errorText: errRePass,
-                            errorStyle: const TextStyle(color: Colors.red,fontSize: 12),
-                            errorBorder: myErrorBorder(),
-                            //put 'Forgot Password?' in counter place
-                            suffixIcon: InkWell(
-                              onTap: () {
-                                //use setState to toggle password visibility
-                                setState(() {
-                                  isVisible = !isVisible;
-                                });
-                              },
-                              child: Icon(isVisible ? Icons.visibility : Icons
-                                  .visibility_off, color: color,),
-                            )
-                        ),
-                      ),
-                    ),
+                        );
+                      }
+                    )),
                     Container(
                       alignment: Alignment.center,
                       margin: const EdgeInsets.only(top: 10),
@@ -292,7 +341,7 @@ class _SignUpState extends State<SignUp>{
                     ),
 
                   ],))
-        )
-    );
+        ))
+         );
   }
 }

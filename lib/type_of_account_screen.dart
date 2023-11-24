@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quiz_gp/input_border.dart';
 import 'signup_screen.dart';
 
 import 'login_screen.dart';
@@ -17,6 +18,7 @@ class _TypeOfAccountScreenState extends State<TypeOfAccountScreen>{
   TextEditingController passwordController = TextEditingController();
   //check if password visible or not
   bool isVisible = false;
+  Color color = const Color(0xff82498d);
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -77,7 +79,7 @@ class _TypeOfAccountScreenState extends State<TypeOfAccountScreen>{
                       child: TextButton(
                         onPressed: () {
                           Navigator.push(context,
-                              MaterialPageRoute(builder: (context) =>  const SignUp()));
+                              MaterialPageRoute(builder: (context) => const SignUp()));
                         },
                         child: const Text('Student', style: TextStyle(
                           color: Colors.white,
@@ -94,7 +96,7 @@ class _TypeOfAccountScreenState extends State<TypeOfAccountScreen>{
                               Navigator.pushReplacement(context,
                                   MaterialPageRoute(builder: (context) =>  const LogIn()));
                             },
-                            child: const Text('log in',style: TextStyle(fontSize: 20),)
+                            child:Text('log in',style: TextStyle(fontSize: 20,color: color),)
                         )
                       ],
                     ),
